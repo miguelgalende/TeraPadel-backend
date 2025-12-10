@@ -8,10 +8,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
-public interface ReservaMongoRepository extends MongoRepository<Reserva, String>{
+public interface ReservaMongoRepository extends MongoRepository<Reserva, String> {
 
     List<Reserva> findByInicioReserva(LocalDateTime inicioReserva);
 
     List<Reserva> findByIdUsuario(String idUsuario);
+
+    List<Reserva> findByIdPista(String idPista);
 
 }
