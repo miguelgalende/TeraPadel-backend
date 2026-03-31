@@ -9,4 +9,6 @@ public interface ClubService {
     Club crear(Club club);
 
     void eliminar(String id);
+
+    Club obtenerPorId(String id);
 }

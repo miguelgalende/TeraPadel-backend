@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import com.TeraPadel.AplicacionReservaPadel.model.Club;
 import com.TeraPadel.AplicacionReservaPadel.repository.ClubMongoRepository;
 import org.springframework.web.server.ResponseStatusException;
+import org.webjars.NotFoundException;
 import org.springframework.http.HttpStatus;
 
 @Service
@@ -32,5 +33,11 @@ public class ClubServiceImpl implements ClubService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Club no encontrado");
         }
         clubRepo.deleteById(id);
+    }
+
+    @Override
+    public Club obtenerPorId(String id) {
+        return clubRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("Club no encontrado"));
     }
 }

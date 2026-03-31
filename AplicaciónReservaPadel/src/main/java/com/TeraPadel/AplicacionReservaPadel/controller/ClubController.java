@@ -37,6 +37,12 @@ public class ClubController {
         return ResponseEntity.ok(clubService.listar());
     }
 
+    @GetMapping("/{idClub}")
+    public ResponseEntity<Club> obtenerPorId(@PathVariable String idClub) {
+        Club club = clubService.obtenerPorId(idClub);
+        return ResponseEntity.ok(club);
+    }
+
     @DeleteMapping("/eliminar/{idClub}")
     public ResponseEntity<?> eliminar(@PathVariable String idClub) {
         try {
