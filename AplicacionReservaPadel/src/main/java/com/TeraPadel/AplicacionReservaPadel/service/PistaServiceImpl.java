@@ -5,16 +5,20 @@ import java.util.HashMap;
 import java.util.List;
 import org.springframework.stereotype.Service;
 
+import com.TeraPadel.AplicacionReservaPadel.exception.RecursoNoEncontradoException;
 import com.TeraPadel.AplicacionReservaPadel.model.Pista;
 import com.TeraPadel.AplicacionReservaPadel.repository.PistaMongoRepository;
+import com.TeraPadel.AplicacionReservaPadel.repository.ReservaMongoRepository;
 import org.webjars.NotFoundException;
 
 @Service
 public class PistaServiceImpl implements PistaService {
     private final PistaMongoRepository pistaRepo;
+    private final ReservaMongoRepository reservaRepo;
 
-    public PistaServiceImpl(PistaMongoRepository pistaRepo) {
+    public PistaServiceImpl(PistaMongoRepository pistaRepo, ReservaMongoRepository reservaRepo) {
         this.pistaRepo = pistaRepo;
+        this.reservaRepo = reservaRepo;
     }
 
     @Override
@@ -52,7 +56,10 @@ public class PistaServiceImpl implements PistaService {
     @Override
     public void eliminar(String id) {
         if (!pistaRepo.existsById(id)) {
-            throw new NotFoundException("Pista no encontrada");
+            throw new RecursoNoEncontradoException("Pista no encontrada");
+        }
+        if (!reservaRepo.findByIdPista(id).isEmpty()) {
+            throw new IllegalStateException("No se puede eliminar la pista porque tiene reservas asociadas");
         }
         pistaRepo.deleteById(id);
     }
