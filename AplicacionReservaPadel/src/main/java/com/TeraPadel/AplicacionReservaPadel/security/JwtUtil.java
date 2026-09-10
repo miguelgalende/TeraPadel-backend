@@ -2,27 +2,48 @@ package com.TeraPadel.AplicacionReservaPadel.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
+import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
-    private final String SECRET_KEY = "MiClaveSecretaSuperSeguraInfalible123!";
+    @Value("${jwt.secret}")
+    private String secretProperty;
+
+    @Value("${jwt.expiration-ms:900000}")
+    private long expirationMs;
+
+    private Key signingKey;
+
+    @PostConstruct
+    private void init() {
+        if (secretProperty == null || secretProperty.getBytes(StandardCharsets.UTF_8).length < 32) {
+            throw new IllegalStateException(
+                    "jwt.secret debe estar configurado y tener al menos 32 bytes. " +
+                            "Define la variable de entorno JWT_SECRET.");
+        }
+        this.signingKey = Keys.hmacShaKeyFor(secretProperty.getBytes(StandardCharsets.UTF_8));
+    }
 
     public String generarToken(String emailUsuario) {
         return Jwts.builder()
                 .setSubject(emailUsuario)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
-                .signWith(Keys.hmacShaKeyFor(SECRET_KEY.getBytes()))
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
+                .signWith(signingKey)
                 .compact();
     }
 
     public String obtenerEmail(String token) {
         return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY.getBytes())
+                .setSigningKey(signingKey)
                 .build()
                 .parseClaimsJws(token)
                 .getBody()
@@ -31,7 +52,7 @@ public class JwtUtil {
 
     public boolean validarToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(SECRET_KEY.getBytes()).build().parse(token);
+            Jwts.parserBuilder().setSigningKey(signingKey).build().parse(token);
             return true;
         } catch (Exception e) {
             return false;
